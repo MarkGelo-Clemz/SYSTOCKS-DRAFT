@@ -1,3 +1,4 @@
+#Day 1- prodduct list with low stock alert
 products = [
     {"Product": "Coke", "Price": 25, "Stock": 50},
     {"Product": "Sprite", "Price": 25, "Stock": 50},
