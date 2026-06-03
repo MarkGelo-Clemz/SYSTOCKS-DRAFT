@@ -25,22 +25,39 @@ def add_product():
     products.append(new_product)
 
 
-def remove_product():
+def remove_product(products):
     print("=========================================")
     remove = input("Input product to remove: ")
     for product in products:
             if product["Product"].lower() == remove.lower():
                 products.remove(product)
 
+def reduce_quan(products):
+    print("=========================================")
+    name = input("Input product name: ")
+    for product in products:
+            if product["Product"].lower() == name.lower():
+                reduce = int(input("How many products to be bought?: "))
+
+                if reduce <= product["Stock"]:
+                    product["Stock"] = product["Stock"] - reduce
+
+                else:
+                    print("Above Threshold!")
+
+            
+
+
 
 
 choice = ""
-while choice != "4":
+while choice != "0":
     print("=========================================")
     print("1. View Products")
     print("2. Add Product")
     print("3. Remove Product")
-    print("4. Exit")
+    print("4. Reduce Quantity")
+    print("0. Exit")
     print("=========================================")
     choice = input("Enter choice: ")
     
@@ -53,7 +70,10 @@ while choice != "4":
         add_product()
         
     elif choice == "3":
-        remove_product()
+        remove_product(products)
 
     elif choice == "4":
+        reduce_quan(products)
+
+    elif choice == "0":
         print("Goodbye")
