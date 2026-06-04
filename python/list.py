@@ -1,4 +1,18 @@
-#Day 1- prodduct list with low stock alert
+#Day 1- prodduct list with low stock a
+import sqlite3
+conn = sqlite3.connect("systocks.db") #a some type of fstream
+cursor = conn.cursor() #a pen where ables you to write commands
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS product (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product TEXT,
+            price REAL,
+            stock INTEGER)
+            """)
+
+conn.commit()
+
 products = [
     {"Product": "Coke", "Price": 25, "Stock": 50},
     {"Product": "Sprite", "Price": 25, "Stock": 50},
