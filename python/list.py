@@ -1,6 +1,6 @@
 #Day 1- prodduct list with low stock a
 import sqlite3
-conn = sqlite3.connect("systocks.db") #a some type of fstream
+conn = sqlite3.connect("systems.db") #a some type of fstream
 cursor = conn.cursor() #a pen where ables you to write commands
 
 cursor.execute("""
@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS product (
             stock INTEGER)
             """)
 
-conn.commit()
 
 products = [
     {"Product": "Coke", "Price": 25, "Stock": 50},
@@ -22,13 +21,24 @@ products = [
     {"Product": "Dr. Pepper", "Price": 25, "Stock": 50},
 ]
 
-def view_products():
-    print("=========================================")
-    for product in products:
-        print(product["Product"], "-", product["Stock"], "left")
+for product in products:
+        cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)",
+                    (product["Product"], product["Price"], product["Stock"]))
         
-        if product["Stock"] <= 10:
-            print("Low Stock Alert:", product["Product"])
+conn.commit()
+
+def view_products():
+    cursor.execute("SELECT * FROM product")
+    results = cursor.fetchall()
+    print(results)
+
+    print("=========================================")
+
+    for row in results:
+        print(row[1], "-", row[3], "left")
+        
+        if row[3] <= 10:
+            print("Low Stock Alert:", row[1])
 
 def add_product():
     print("=========================================")
