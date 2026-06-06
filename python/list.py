@@ -1,15 +1,15 @@
 #Day 1- prodduct list with low stock a
 import sqlite3
-conn = sqlite3.connect("systems.db") #a some type of fstream
+conn = sqlite3.connect("magic.db") #a some type of fstream
 cursor = conn.cursor() #a pen where ables you to write commands
 
-cursor.execute("""
+cursor.execute(""" 
 CREATE TABLE IF NOT EXISTS product (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product TEXT,
             price REAL,
             stock INTEGER)
-            """)
+            """) #this is like a template for the db
 
 
 products = [
@@ -21,16 +21,20 @@ products = [
     {"Product": "Dr. Pepper", "Price": 25, "Stock": 50},
 ]
 
-for product in products:
+
+cursor.execute("SELECT COUNT (*) FROM product")
+count = cursor.fetchone()[0]
+
+if count == 0:
+    for product in products:
         cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)",
                     (product["Product"], product["Price"], product["Stock"]))
-        
 conn.commit()
 
 def view_products():
-    cursor.execute("SELECT * FROM product")
+    cursor.execute("SELECT * FROM product") #gathers and red the data
     results = cursor.fetchall()
-    print(results)
+    
 
     print("=========================================")
 
