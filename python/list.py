@@ -32,7 +32,7 @@ if count == 0:
 conn.commit()
 
 def view_products():
-    cursor.execute("SELECT * FROM product") #gathers and red the data
+    cursor.execute("SELECT * FROM product ORDER BY product") #gathers and red the data 
     results = cursor.fetchall()
     
 
@@ -46,11 +46,12 @@ def view_products():
 
 def add_product():
     print("=========================================")
-    name = input("Input Product Name: ")
+    name = input("Input Product Name: ").capitalize()
     price = float(input("Input Product Price: "))
     stock = int(input("Input Product Quantity: "))
     new_product = {"Product": name, "Price": price, "Stock": stock}
-    products.append(new_product)
+    cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)", (name, price, stock))
+    conn.commit()
 
 
 def remove_product(products):
@@ -58,7 +59,8 @@ def remove_product(products):
     remove = input("Input product to remove: ")
     for product in products:
             if product["Product"].lower() == remove.lower():
-                products.remove(product)
+                cursor.execute("DELETE FROM product WHERE LOWER(product) = LOWER(?)", (remove,)) #to delete command LOWER or UPPER for replacement
+                conn.commit()
 
 def reduce_quan(products):
     print("=========================================")
@@ -67,11 +69,16 @@ def reduce_quan(products):
             if product["Product"].lower() == name.lower():
                 reduce = int(input("How many products to be bought?: "))
 
+
                 if reduce <= product["Stock"]:
                     product["Stock"] = product["Stock"] - reduce
 
                 else:
                     print("Above Threshold!")
+                
+                cursor.execute("UPDATE product SET stock = ? WHERE LOWER(product) = LOWER(?)", (product["Stock"], name))
+                conn.commit()
+                
 
             
 
