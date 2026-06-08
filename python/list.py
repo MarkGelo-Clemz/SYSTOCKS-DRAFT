@@ -1,7 +1,12 @@
 #Day 1- prodduct list with low stock a
 import sqlite3
+import os
 conn = sqlite3.connect("magic.db") #a some type of fstream
 cursor = conn.cursor() #a pen where ables you to write commands
+
+#clearscreen
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 cursor.execute(""" 
 CREATE TABLE IF NOT EXISTS product (
@@ -44,30 +49,49 @@ def view_products():
         if row[3] <= 10:
             print("Low Stock Alert:", row[1])
 
-def add_product():
+def add_product(products):
     print("=========================================")
-    name = input("Input Product Name: ").capitalize()
-    price = float(input("Input Product Price: "))
-    stock = int(input("Input Product Quantity: "))
-    new_product = {"Product": name, "Price": price, "Stock": stock}
-    cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)", (name, price, stock))
-    conn.commit()
+    name = input("Input Product Name (0 to back): ").capitalize()
+    if name == "0":
+        return
+
+    cursor.execute("SELECT COUNT(*) FROM product WHERE LOWER(product) = LOWER(?)", (name,))
+    count = cursor.fetchone()[0] #grabs result just 1
+
+
+    if count == 1:
+        print("Product already exists")
+        add = int(input("How many stock to add? (0 to back): "))
+        if add == "0":
+            return 
+        cursor.execute("UPDATE product SET stock = stock + ? WHERE LOWER(product) = LOWER(?)", (add, name))
+        conn.commit()
+
+    else:
+        price = float(input("Input Product Price: "))
+        stock = int(input("Input Product Quantity: "))
+        cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)", (name, price, stock))
+        conn.commit()
 
 
 def remove_product(products):
     print("=========================================")
-    remove = input("Input product to remove: ")
-    for product in products:
-            if product["Product"].lower() == remove.lower():
-                cursor.execute("DELETE FROM product WHERE LOWER(product) = LOWER(?)", (remove,)) #to delete command LOWER or UPPER for replacement
-                conn.commit()
+    remove = input("Input product to remove (0 to back): ")
+    if remove == "0":
+        return
+    cursor.execute("DELETE FROM product WHERE LOWER(product) = LOWER(?)", (remove,)) #to delete command LOWER or UPPER for replacement
+    conn.commit()
 
 def reduce_quan(products):
     print("=========================================")
-    name = input("Input product name: ")
+    name = input("Input product name (0 to back): ")
+    if name == "0":
+        return
     for product in products:
             if product["Product"].lower() == name.lower():
-                reduce = int(input("How many products to be bought?: "))
+                reduce = int(input("How many products to be bought? (0 to back): "))
+                if reduce == "0":
+                    return
 
 
                 if reduce <= product["Stock"]:
@@ -87,6 +111,7 @@ def reduce_quan(products):
 
 choice = ""
 while choice != "0":
+
     print("=========================================")
     print("1. View Products")
     print("2. Add Product")
@@ -99,16 +124,21 @@ while choice != "0":
 
 
     if choice == "1":
+        clear()
         view_products()
 
     elif choice == "2":
-        add_product()
+        clear()
+        add_product(products)
         
     elif choice == "3":
+        clear()
         remove_product(products)
 
     elif choice == "4":
+        clear()
         reduce_quan(products)
 
     elif choice == "0":
+        clear()
         print("Goodbye")
