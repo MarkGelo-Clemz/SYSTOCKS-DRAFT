@@ -16,7 +16,7 @@ def clear():
 
 #PRODUCT LISTS =================================================
 cursor.execute(""" 
-CREATE TABLE IF NOT EXISTS product (
+CREATE TABLE IF NOT EXISTS product ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product TEXT,
             price REAL,
@@ -45,7 +45,8 @@ if count == 0:
     for product in products:
         cursor.execute("INSERT INTO product (product, price, stock) VALUES (?, ?, ?)",
                     (product["Product"], product["Price"], product["Stock"]))
-conn.commit()
+        
+        conn.commit()
 #PRODUCT LISTS =================================================
 
 
@@ -53,7 +54,7 @@ conn.commit()
 
 
 #USERS =================================================
-#ERROR HERE DOESNT CREATE THE TABLE
+
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,12 +77,41 @@ if count == 0:
                     (user["Username"], user["Password"], user["role"]))
 conn.commit()
 
+
+
+
+def change_password():
+    print("====================SYSTOCKS ACCOUNT INFORMATION====================")
+    username = input("Input current username: ")
+    password = input("Input current password: ")
+
+    cursor.execute("SELECT role FROM users WHERE username = ? AND password = ?", (username, password))
+    result = cursor.fetchone()
+
+    if result is None:
+        print("Invald Credentials!")
+        return None
+    
+    else:
+        new_user = input("Input New Username: ")
+        new_password = input("Input New Password: ")
+
+        cursor.execute("UPDATE users SET username = ?, password = ? WHERE username = ?", (new_user, new_password, username))
+        conn.commit()
+        clear()
+        print("Credentials updated successfully!")
+        
+
+    
+
+
+
 def login():
     print("====================SYSTOCKS LOGIN====================")
-    username = input("Username: ").lower()
-    password = input("Password: ").lower()
+    username = input("Username: ")
+    password = input("Password: ")
 
-    cursor.execute("SELECT role FROM users WHERE LOWER(username) = LOWER(?) AND LOWER(password) = LOWER(?)", (username, password))
+    cursor.execute("SELECT role FROM users WHERE username = ? AND password = ?", (username, password))
     result = cursor.fetchone()
 
     if result is None:
@@ -103,11 +133,11 @@ def login():
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS sales(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product TEXT
+            product TEXT,
             quantity INTEGER,
             price REAL,
-            toal REAL,
-            dat TEXT)
+            total REAL,
+            date TEXT)
             """)
 
 
@@ -141,7 +171,7 @@ def view_products():
         if row[3] <= 10:
             print("Low Stock Alert:", row[1])
 
-def add_product(products):
+def add_product():
     print("=========================================")
     name = input("Input Product Name (0 to back): ").capitalize()
     if name == "0":
@@ -166,7 +196,7 @@ def add_product(products):
         conn.commit()
 
 
-def remove_product(products):
+def remove_product():
     print("=========================================")
     remove = input("Input product to remove (0 to back): ")
     if remove == "0":
@@ -175,34 +205,40 @@ def remove_product(products):
     conn.commit()
 
 
-# WE HAVE ERROR HERE ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-def reduce_quan(products):
+def reduce_quan():
     print("=========================================")
     name = input("Input product name (0 to back): ")
     if name == "0":
         return
     
-    cursor.execute("SELECT stock FROM product WHERE LOWER(product) = LOWER(?)", (name,))
+    cursor.execute("SELECT stock, price FROM product WHERE LOWER(product) = LOWER(?)", (name,))
     result = cursor.fetchone()
 
     if result is None:
         print("Product not found.")
         return
 
-        current_stock = result[0]
-        reduce = int(input("How many products to be bought? (0 to back): "))
-        if reduce == 0:
-            return
+    current_stock = result[0]
+    current_price = result[1]
+    reduce = int(input("How many products to be bought? (0 to back): "))
+    if reduce == 0:
+        return
+    
+        
 
 
-        if reduce <= product["Stock"]:
-            product["Stock"] = product["Stock"] - reduce
-            cursor.execute("UPDATE product SET stock = ? WHERE LOWER(product) = LOWER(?)", (product["Stock"], name))
-            conn.commit()
-            print("Stock Updated")
+    if reduce <= current_stock:
+        new_stock = current_stock - reduce
+        total = current_price * reduce
+        cursor.execute("UPDATE product SET stock = ? WHERE LOWER(product) = LOWER(?)", (new_stock, name))
+        conn.commit()
 
-        else:
-            print("Above Threshold!")
+        cursor.execute("INSERT INTO sales (product, quantity, price, total, date) VALUES (?, ?, ?, ?, ?)", (name, reduce, current_price, total, date))
+        conn.commit()
+        print("Stock Updated")
+
+    else:
+        print("Above Threshold!")
                 
 #FUNCTIONS ================================================================
             
@@ -226,6 +262,7 @@ while choice != "0":
         print("2. Add Product")
         print("3. Remove Product")
         print("4. Reduce Quantity")
+        print("5. Change Username & Password")
         print("0. Exit")
         print("=========================================")
         choice = input("Enter choice: ")
@@ -236,15 +273,19 @@ while choice != "0":
             
         elif choice == "2":
             clear()
-            add_product(products)
+            add_product()
             
         elif choice == "3":
             clear()
-            remove_product(products)
+            remove_product()
 
         elif choice == "4":
             clear()
-            reduce_quan(products)
+            reduce_quan()
+
+        elif choice == "5":
+            clear()
+            change_password()
 
         elif choice == "0":
             clear()
@@ -265,9 +306,9 @@ while choice != "0":
             clear()
             view_products()
 
-        elif choice == "4":
+        elif choice == "2":
             clear()
-            reduce_quan(products)
+            reduce_quan()
 
         elif choice == "0":
             clear()
