@@ -142,17 +142,98 @@ CREATE TABLE IF NOT EXISTS sales(
 
 
 
+def view_sales():
+    cursor.execute("SELECT * FROM sales ORDER BY date DESC") #gathers and red the data 
+    results = cursor.fetchall()
+    if len(results) == 0:
+        print("No sales yet!")
+        return
 
+    print("=========================================")
 
-
-
-
+    for row in results:
+        print(row[1], "-", row[2], " ", row[3], "-", row[4], "-", row[5])
+    
+    print("=========================================")
 
 #SALES =================================================================================
 
 
 
 
+
+#PRoFIT REPORTS ====================================================================
+
+def view_profit():
+    cursor.execute("SELECT SUM(total) FROM sales")
+    profit = cursor.fetchone()[0]
+    if profit is None:
+        print("No sales recorded yet!")
+        return
+
+    print("Total Profit: PHP", profit)
+
+
+def view_inventory():
+    cursor.execute("SELECT * FROM product ORDER BY product") #gathers and red the data 
+    results = cursor.fetchall()
+    if len(results) == 0:
+        print("No products yet!")
+        return
+    
+
+    print("=========================================")
+
+    for row in results:
+        if row[3] <= 10:
+            status = "LOW STOCK!"
+
+        else:
+            status = "OK"
+
+        print(row[1], "-", row[2], "-", row[3], status)
+
+#PRoFIT REPORTS ====================================================================
+
+
+#SEARCH FUNCTIOn ==============================================================
+
+def search_product():
+    search = input("Search Product Name: ")
+    cursor.execute("SELECT * FROM product WHERE LOWER(product) = LOWER(?)", (search,))
+    searching = cursor.fetchone()
+
+    if searching is None:
+            print("Produt Not Found!")
+            return
+        
+    print(searching[1], "-", searching[2], "-", searching[3])
+
+
+#SEARCH FUNCTIOn ==============================================================
+
+
+#EDIT product price =============================================================
+def edit_price():
+    edit = input("Enter Product Name: ")
+    cursor.execute("SELECT * FROM product WHERE LOWER(product) = LOWER(?)", (edit,))
+    editing= cursor.fetchone()
+
+    if editing is None:
+            print("Produt Not Found!")
+            return
+        
+    else:
+        new_price = int(input("Input New Price of " + edit + " : "))
+        cursor.execute("UPDATE product SET price = ? WHERE LOWER(product) = LOWER(?)", (new_price, edit))
+        conn.commit()
+
+
+
+
+
+
+#EDIT product price =============================================================
 
 
 
@@ -161,12 +242,15 @@ CREATE TABLE IF NOT EXISTS sales(
 def view_products():
     cursor.execute("SELECT * FROM product ORDER BY product") #gathers and red the data 
     results = cursor.fetchall()
+    if len(results) == 0:
+        print("No products yet!")
+        return
     
 
     print("=========================================")
 
     for row in results:
-        print(row[1], "-", row[3], "left")
+        print(row[1], "-", row[2], "-", row[3], "left")
         
         if row[3] <= 10:
             print("Low Stock Alert:", row[1])
@@ -201,9 +285,18 @@ def remove_product():
     remove = input("Input product to remove (0 to back): ")
     if remove == "0":
         return
-    cursor.execute("DELETE FROM product WHERE LOWER(product) = LOWER(?)", (remove,)) #to delete command LOWER or UPPER for replacement
-    conn.commit()
-
+    
+    confirm = input("Are you sure you want to remove " + remove + "? (y/n)").lower()
+    if confirm == 'y':
+        cursor.execute("DELETE FROM product WHERE LOWER(product) = LOWER(?)", (remove,)) #to delete command LOWER or UPPER for replacement
+        conn.commit()
+        
+    elif confirm == 'n':
+        return
+    
+    else:
+        print("Invalid Choice!")
+        return
 
 def reduce_quan():
     print("=========================================")
@@ -263,6 +356,11 @@ while choice != "0":
         print("3. Remove Product")
         print("4. Reduce Quantity")
         print("5. Change Username & Password")
+        print("6. View Sales")
+        print("7. View Profit")
+        print("8. View Inventory")
+        print("9. Search Product")
+        print("E. Edit Price")
         print("0. Exit")
         print("=========================================")
         choice = input("Enter choice: ")
@@ -287,9 +385,34 @@ while choice != "0":
             clear()
             change_password()
 
+        elif choice == "6":
+            clear()
+            view_sales()
+
+        elif choice == "7":
+            clear()
+            view_sales()
+            view_profit()
+
+        elif choice == "8":
+            clear()
+            view_inventory()
+
+        elif choice == "9":
+            clear()
+            search_product()
+
+        elif choice == 'E':
+            clear()
+            edit_price()
+
         elif choice == "0":
             clear()
             print("Goodbye")
+
+        else:
+            print("Invalid Choice!")
+            
     
     elif role == "staff":
 
@@ -298,6 +421,7 @@ while choice != "0":
         print("=========================================")
         print("1. View Products")
         print("2. Reduce Quantity")
+        print("3. Search Product")
         print("0. Exit")
         print("=========================================")
         choice = input("Enter choice: ")
@@ -309,6 +433,10 @@ while choice != "0":
         elif choice == "2":
             clear()
             reduce_quan()
+
+        elif choice == "3":
+            clear()
+            search_product()
 
         elif choice == "0":
             clear()
