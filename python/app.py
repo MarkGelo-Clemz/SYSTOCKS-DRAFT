@@ -10,7 +10,7 @@ st.write("Welcome to SYSTOCKS")
 
 
 st.sidebar.title("Navigation")
-page = st.sidebar.selectbox("Choose", ["View Products", "Add Products", "Remove Products"])
+page = st.sidebar.selectbox("Choose", ["View Products", "Add Products", "Remove Products", "Reduce Quantity"])
 
 if page == "View Products":
     cursor.execute("SELECT * FROM product ORDER BY product") #gathers and red the data 
@@ -39,7 +39,7 @@ elif page == "Add Products":
                 conn.commit()
                 st.write("Stock Updated!")
                 st.session_state.clear()
-                st.rerun
+                st.rerun()
 
         else:
             st.info("New Product! Fill in details!")
@@ -51,7 +51,7 @@ elif page == "Add Products":
                 conn.commit()
                 st.write("Product Added!")
                 st.session_state.clear()
-                st.rerun
+                st.rerun()
 
 
 elif page == "Remove Products":
@@ -60,7 +60,7 @@ elif page == "Remove Products":
         st.session_state["remove_name"] = remove
     
     if "remove_name" in st.session_state:
-        st.warning("Are you sure you want to remove " + remove)
+        st.warning("Are you sure you want to remove " + st.session_state["remove_name"])
         col1, col2 = st.columns(2)
 
         with col1:
@@ -75,6 +75,12 @@ elif page == "Remove Products":
                 st.session_state.clear()
                 st.rerun()
         
-
+elif page == "Reduce Quantity":
+    name = st.text_input("Input product name: ")
+    if st.button("Search"):
+        cursor.execute("SELECT * FROM product ORDER BY product") #gathers and red the data 
+        results = cursor.fetchone()
+        df = pd.DataFrame(results, columns=["ID", "Product", "Price", "Stock"])
+        st.dataframe(df)
 
     
